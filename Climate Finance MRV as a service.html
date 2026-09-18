@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GCFT Portal — MRV-as-a-Service for Caribbean Climate Assets</title>
+<style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    :root{
+        --navy:#0a1628;
+        --navy-mid:#12223d;
+        --teal:#00b4d8;
+        --teal-light:#48cae4;
+        --gold:#ffb703;
+        --green:#2d6a4f;
+        --green-light:#52b788;
+        --coral:#e76f51;
+        --purple:#7c3aed;
+        --white:#ffffff;
+        --off:#f4f7fa;
+        --text:#0f1a2e;
+        --text-mid:#4a5568;
+        --text-light:#8896a8;
+        --border:rgba(10,22,40,0.08);
+        --shadow:0 4px 20px rgba(10,22,40,0.08);
+        --shadow-lg:0 12px 40px rgba(10,22,40,0.14);
+        --radius:12px;
+        --radius-lg:18px;
+    }
+
+    body{
+        font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+        background:var(--off); color:var(--text); line-height:1.6;
+        overflow-x:hidden;
+    }
+
+    /* ===== NAV ===== */
+    .topbar{
+        position:fixed; top:0; left:0; right:0; z-index:1000;
+        background:var(--navy); height:64px;
+        display:flex; align-items:center; padding:0 24px;
+        box-shadow:0 2px 20px rgba(0,0,0,0.2);
+    }
+    .topbar-inner{
+        max-width:1440px; margin:0 auto; width:100%;
+        display:flex; align-items:center; justify-content:space-between;
+    }
+    .brand{
+        display:flex; align-items:center; gap:12px;
+        font-size:1.15rem; font-weight:800; color:#fff;
+        letter-spacing:-0.3px; text-decoration:none;
+    }
+    .brand-mark{
+        width:36px; height:36px; border-radius:10px;
+        background:linear-gradient(135deg,var(--teal),var(--gold));
+        display:flex; align-items:center; justify-content:center;
+        font-size:1rem; font-weight:900; color:var(--navy);
+    }
+    .brand span b{ color:var(--teal-light); }
+
+    .topnav{ display:flex; gap:2rem; list-style:none; }
+    .topnav a{
+        color:rgba(255,255,255,0.7); text-decoration:none;
+        font-size:0.84rem; font-weight:500; transition:color 0.2s;
+    }
+    .topnav a:hover,.topnav a.active{ color:var(--teal-light); }
+
+    .topbar-actions{ display:flex; align-items:center; gap:14px; }
+    .env-badge{
+        font-size:0.68rem; font-weight:700; text-transform:uppercase;
+        letter-spacing:1px; padding:5px 12px; border-radius:50px;
+        background:rgba(0,180,216,0.15); color:var(--teal-light);
+        border:1px solid rgba(0,180,216,0.3);
+    }
+    .avatar{
+        width:34px; height:34px; border-radius:50%;
+        background:linear-gradient(135deg,var(--green),var(--green-light));
+        display:flex; align-items:center; justify-content:center;
+        font-size:0.78rem; font-weight:700; color:#fff; cursor:pointer;
+    }
+
+    /* ===== LAYOUT ===== */
+    .app{ display:flex; padding-top:64px; min-height:100vh; }
+
+    .sidebar{
+        width:248px; flex-shrink:0; background:var(--white);
+        border-right:1px solid var(--border); padding:28px 0;
+        position:fixed; top:64px; bottom:0; overflow-y:auto;
+    }
+    .sidebar-section{ padding:0 16px; margin-bottom:28px; }
+    .sidebar-section h4{
+        font-size:0.65rem; font-weight:800; text-transform:uppercase;
+        letter-spacing:1.4px; color:var(--text-light); margin-bottom:10px;
+        padding-left:12px;
+    }
+    .sidebar-nav{ list-style:none; display:flex; flex-direction:column; gap:2px; }
+    .sidebar-nav a{
+        display:flex; align-items:center; gap:11px;
+        padding:10px 12px; border-radius:10px;
+        text-decoration:none; color:var(--text-mid);
+        font-size:0.86rem; font-weight:500; transition:all 0.18s;
+    }
+    .sidebar-nav a:hover{ background:var(--off); color:var(--text); }
+    .sidebar-nav a.active{
+        background:linear-gradient(135deg,rgba(0,180,216,0.12),rgba(255,183,3,0.08));
+        color:var(--navy); font-weight:600;
+    }
+    .sidebar-nav a .ni{ font-size:1.05rem; width:20px; text-align:center; }
+    .sidebar-nav a .badge{
+        margin-left:auto; font-size:0.62rem; font-weight:700;
+        background:var(--coral); color:#fff; padding:2px 7px; border-radius:50px;
+    }
+
+    .main{
+        flex:1; margin-left:248px; padding:32px 36px 60px;
+        max-width:1192px;
+    }
+
+    /* ===== PAGE HEADER ===== */
+    .page-head{ margin-bottom:28px; }
+    .page-head .crumb{
+        font-size:0.75rem; color:var(--text-light); margin-bottom:6px;
+        font-weight:500;
+    }
+    .page-head h1{
+        font-size:1.75rem; font-weight:800; letter-spacing:-0.8px;
+        color:var(--navy); margin-bottom:6px;
+    }
+    .page-head p{ font-size:0.92rem; color:var(--text-mid); max-width:720px; }
+
+    /* ===== CARDS ===== */
+    .card{
+        background:var(--white); border-radius:var(--radius-lg);
+        border:1px solid var(--border); box-shadow:var(--shadow);
+    }
+    .card-pad{ padding:24px 28px; }
+
+    /* ===== STAT ROW ===== */
+    .stat-row{
+        display:grid; grid-template-columns:repeat(4,1fr);
+        gap:16px; margin-bottom:24px;
+    }
+    .stat-card{
+        background:var(--white); border-radius:var(--radius);
+        border:1px solid var(--border); padding:20px 22px;
+        box-shadow:var(--shadow); position:relative; overflow:hidden;
+    }
+    .stat-card::after{
+        content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    }
+    .stat-card.teal::after{ background:linear-gradient(90deg,var(--teal),var(--teal-light)); }
+    .stat-card.gold::after{ background:linear-gradient(90deg,var(--gold),#ffd166); }
+    .stat-card.green::after{ background:linear-gradient(90deg,var(--green),var(--green-light)); }
+    .stat-card.purple::after{ background:linear-gradient(90deg,var(--purple),#a78bfa); }
+    .stat-card .sl{
+        font-size:0.7rem; font-weight:700; text-transform:uppercase;
+        letter-spacing:1px; color:var(--text-light); margin-bottom:8px;
+    }
+    .stat-card .sv{
+        font-size:1.6rem; font-weight:800; color:var(--navy);
+        letter-spacing:-0.8px; line-height:1.1;
+    }
+    .stat-card .sd{
+        font-size:0.75rem; color:var(--text-light); margin-top:4px;
+    }
+    .stat-card .sd .up{ color:var(--green-light); font-weight:700; }
+    .stat-card .sd .down{ color:var(--coral); font-weight:700; }
+
+    /* ===== ASSET CARDS ===== */
+    .asset-grid{
+        display:grid; grid-template-columns:repeat(3,1fr);
+        gap:16px; margin-bottom:28px;
+    }
+    .asset-card{
+        background:var(--white); border:1.5px solid var(--border);
+        border-radius:var(--radius-lg); padding:20px;
+        cursor:pointer; transition:all 0.22s; position:relative;
+    }
+    .asset-card:hover{
+        transform:translateY(-4px); box-shadow:var(--shadow-lg);
+        border-color:var(--teal);
+    }
+    .asset-card.selected{
+        border-color:var(--teal); background:linear-gradient(160deg,#fff,rgba(0,180,216,0.04));
+        box-shadow:0 0 0 3px rgba(0,180,216,0.12);
+    }
+    .asset-card .ac-icon{
+        width:44px; height:44px; border-radius:12px;
+        display:flex; align-items:center; justify-content:center;
+        font-size:1.3rem; margin-bottom:12px;
+    }
+    .asset-card h4{ font-size:0.95rem; font-weight:700; color:var(--navy); margin-bottom:2px; }
+    .asset-card .ac-tag{ font-size:0.72rem; color:var(--text-light); margin-bottom:10px; }
+    .asset-card .ac-meta{
+        display:flex; justify-content:space-between; padding-top:10px;
+        border-top:1px solid var(--border); font-size:0.72rem;
+    }
+    .asset-card .ac-meta .k{ color:var(--text-light); }
+    .asset-card .ac-meta .v{ font-weight:700; color:var(--navy); }
+
+    /* ===== WORKFLOW ===== */
+    .workflow-steps{
+        display:flex; align-items:center; gap:0; margin-bottom:24px;
+        background:var(--white); border-radius:var(--radius-lg);
+        border:1px solid var(--border); padding:18px 22px; overflow-x:auto;
+    }
+    .wf-step{
+        display:flex; align-items:center; gap:10px;
+        padding:6px 14px; border-radius:50px; white-space:nowrap;
+        font-size:0.82rem; font-weight:600; color:var(--text-light);
+        transition:all 0.2s;
+    }
+    .wf-step .num{
+        width:26px; height:26px; border-radius:50%;
+        background:var(--off); color:var(--text-light);
+        display:flex; align-items:center; justify-content:center;
+        font-size:0.72rem; font-weight:800; flex-shrink:0;
+        border:1.5px solid var(--border);
+    }
+    .wf-step.active{ color:var(--navy); }
+    .wf-step.active .num{
+        background:linear-gradient(135deg,var(--teal),var(--teal-light));
+        color:#fff; border-color:transparent;
+    }
+    .wf-step.done{ color:var(--green); }
+    .wf-step.done .num{
+        background:var(--green); color:#fff; border-color:transparent;
+    }
+    .wf-connector{
+        flex:1; height:2px; background:var(--border); min-width:20px;
+    }
+    .wf-connector.done{ background:var(--green-light); }
+
+    /* ===== FORM ===== */
+    .form-grid{
+        display:grid; grid-template-columns:1fr 1fr; gap:18px;
+    }
+    .field{ display:flex; flex-direction:column; }
+    .field.full{ grid-column:1 / -1; }
+    .field label{
+        font-size:0.72rem; font-weight:700; text-transform:uppercase;
+        letter-spacing:0.8px; color:var(--text-mid); margin-bottom:6px;
+    }
+    .field input,.field select,.field textarea{
+        padding:11px 14px; border-radius:10px;
+        border:1.5px solid var(--border); background:var(--off);
+        font-size:0.9rem; font-family:inherit; color:var(--text);
+        outline:none; transition:all 0.2s; width:100%;
+    }
+    .field input:focus,.field select:focus,.field textarea:focus{
+        border-color:var(--teal); background:#fff;
+        box-shadow:0 0 0 3px rgba(0,180,216,0.1);
+    }
+    .field .hint{ font-size:0.7rem; color:var(--text-light); margin-top:4px; }
+
+    /* ===== BUTTONS ===== */
+    .btn{
+        display:inline-flex; align-items:center; gap:8px;
+        padding:11px 22px; border-radius:50px; font-size:0.86rem;
+        font-weight:700; cursor:pointer; border:none;
+        font-family:inherit; transition:all 0.2s; text-decoration:none;
+    }
+    .btn-primary{
+        background:linear-gradient(135deg,var(--teal),var(--gold));
+        color:var(--navy);
+    }
+    .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,180,216,0.35); }
+    .btn-ghost{
+        background:transparent; color:var(--text-mid);
+        border:1.5px solid var(--border);
+    }
+    .btn-ghost:hover{ border-color:var(--teal); color:var(--teal); }
+    .btn-green{
+        background:linear-gradient(135deg,var(--green),var(--green-light));
+        color:#fff;
+    }
+    .btn-green:hover{ transform:translateY(-2px); box-shadow:0 8px 24px rgba(45,106,79,0.3); }
+    .btn-sm{ padding:8px 16px; font-size:0.8rem; }
+
+    /* ===== DATA TABLE ===== */
+    .table-wrap{ overflow-x:auto; }
+    table.data{
+        width:100%; border-collapse:collapse; font-size:0.85rem;
+    }
+    table.data th{
+        text-align:left; padding:11px 14px;
+        font-size:0.68rem; font-weight:800; text-transform:uppercase;
+        letter-spacing:1px; color:var(--text-light);
+        border-bottom:2px solid var(--border); white-space:nowrap;
+    }
+    table.data td{
+        padding:13px 14px; border-bottom:1px solid var(--border);
+        color:var(--text-mid);
+    }
+    table.data tr:hover td{ background:var(--off); }
+    table.data td .strong{ font-weight:700; color:var(--navy); }
+    .status-pill{
+        display:inline-flex; align-items:center; gap:5px;
+        font-size:0.68rem; font-weight:700; text-transform:uppercase;
+        letter-spacing:0.5px; padding:4px 10px; border-radius:50px;
+    }
+    .status-pill.verified{ background:rgba(45,106,79,0.12); color:var(--green); }
+    .status-pill.pending{ background:rgba(255,183,3,0.15); color:#b45309; }
+    .status-pill.draft{ background:rgba(136,150,168,0.15); color:var(--text-light); }
+    .status-pill.flagged{ background:rgba(231,111,81,0.12); color:var(--coral); }
+
+    /* ===== ALERT ===== */
+    .alert{
+        display:flex; gap:12px; padding:14px 18px; border-radius:12px;
+        font-size:0.84rem; line-height:1.55; margin-bottom:20px;
+    }
+    .alert.info{
+        background:rgba(0,180,216,0.07);
+        border:1px solid rgba(0,180,216,0.22); color:#0e5a73;
+    }
+    .alert.warn{
+        background:rgba(255,183,3,0.08);
+        border:1px solid rgba(255,183,3,0.3); color:#8a5a00;
+    }
+    .alert .ai{ font-size:1.05rem; flex-shrink:0; }
+    .alert b{ font-weight:700; }
+
+    /* ===== CALCULATOR OUTPUT ===== */
+    .calc-output{
+        background:linear-gradient(160deg,var(--navy),var(--navy-mid));
+        border-radius:var(--radius-lg); padding:28px; color:#fff;
+        position:relative; overflow:hidden;
+    }
+    .calc-output::before{
+        content:''; position:absolute; top:-40%; right:-25%;
+        width:380px; height:380px; border-radius:50%;
+        background:radial-gradient(circle,rgba(0,180,216,0.15),transparent 70%);
+    }
+    .calc-output .co-label{
+        font-size:0.68rem; font-weight:700; text-transform:uppercase;
+        letter-spacing:1.5px; color:rgba(255,255,255,0.5); margin-bottom:6px;
+    }
+    .calc-output .co-main{
+        font-size:2.4rem; font-weight:900; letter-spacing:-1px;
+        background:linear-gradient(135deg,var(--teal-light),var(--gold));
+        -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+        background-clip:text; line-height:1.1; position:relative; z-index:1;
+    }
+    .calc-output .co-sub{
+        font-size:0.86rem; color:var(--teal-light); margin-top:6px;
+        font-weight:600; position:relative; z-index:1;
+    }
+    .calc-metrics{
+        display:grid; grid-template-columns:1fr 1fr; gap:14px;
+        margin-top:22px; position:relative; z-index:1;
+    }
+    .calc-metric{
+        background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
+        border-radius:12px; padding:14px;
+    }
+    .calc-metric .cm-k{
+        font-size:0.68rem; color:rgba(255,255,255,0.55);
+        text-transform:uppercase; letter-spacing:0.8px; margin-bottom:4px;
+    }
+    .calc-metric .cm-v{ font-size:1.05rem; font-weight:800; color:#fff; }
+
+    .calc-breakdown{ margin-top:20px; position:relative; z-index:1; }
+    .cb-row{ margin-bottom:12px; }
+    .cb-top{
+        display:flex; justify-content:space-between;
+        font-size:0.75rem; color:rgba(255,255,255,0.75); margin-bottom:5px;
+    }
+    .cb-bar{ height:6px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden; }
+    .cb-fill{ height:100%; border-radius:4px; transition:width 0.4s ease; }
+
+    /* ===== TABS ===== */
+    .tabs{
+        display:flex; gap:6px; margin-bottom:20px;
+        border-bottom:1px solid var(--border); overflow-x:auto;
+    }
+    .tab{
+        padding:10px 18px; font-size:0.84rem; font-weight:600;
+        color:var(--text-light); cursor:pointer; border:none;
+        background:none; font-family:inherit; white-space:nowrap;
+        border-bottom:2px solid transparent; transition:all 0.2s;
+    }
+    .tab:hover{ color:var(--text); }
+    .tab.active{ color:var(--teal); border-bottom-color:var(--teal); }
+
+    /* ===== SECTION HEAD ===== */
+    .sec-head{
+        display:flex; align-items:center; justify-content:space-between;
+        margin-bottom:16px; gap:16px; flex-wrap:wrap;
+    }
+    .sec-head h2{
+        font-size:1.05rem; font-weight:800; color:var(--navy);
+        letter-spacing:-0.3px;
+    }
+    .sec-head p{ font-size:0.8rem; color:var(--text-light); margin-top:2px; }
+
+    /* ===== REPORT BLOCKS ===== */
+    .report-grid{
+        display:grid; grid-template-columns:1fr 1fr; gap:16px;
+    }
+    .report-block{
+        border:1px solid var(--border); border-radius:14px;
+        padding:20px; background:var(--white);
+    }
+    .report-block h4{
+        font-size:0.88rem; font-weight:700; color:var(--navy);
+        margin-bottom:10px; display:flex; align-items:center; gap:8px;
+    }
+    .report-block .rb-note{
+        font-size:0.78rem; color:var(--text-light); margin-bottom:12px;
+        line-height:1.55;
+    }
+    .rb-stats{ display:flex; flex-direction:column; gap:8px; }
+    .rb-stat{
+        display:flex; justify-content:space-between; font-size:0.82rem;
+        padding:7px 0; border-bottom:1px dashed var(--border);
+    }
+    .rb-stat:last-child{ border-bottom:none; }
+    .rb-stat .k{ color:var(--text-light); }
+    .rb-stat .v{ font-weight:700; color:var(--navy); }
+
+    /* ===== DOC LIST ===== */
+    .doc-list{ list-style:none; display:flex; flex-direction:column; gap:8px; }
+    .doc-item{
+        display:flex; align-items:center; gap:12px; padding:12px 16px;
+        border:1px solid var(--border); border-radius:12px;
+        background:var(--white); transition:all 0.18s;
+    }
+    .doc-item:hover{ border-color:var(--teal); box-shadow:var(--shadow); }
+    .doc-item .di-icon{
+        width:34px; height:34px; border-radius:9px;
+        background:var(--off); display:flex; align-items:center;
+        justify-content:center; font-size:0.95rem; flex-shrink:0;
+    }
+    .doc-item .di-body{ flex:1; min-width:0; }
+    .doc-item .di-title{
+        font-size:0.84rem; font-weight:700; color:var(--navy);
+    }
+    .doc-item .di-meta{ font-size:0.72rem; color:var(--text-light); }
+    .doc-item .di-action{
+        font-size:0.75rem; font-weight:700; color:var(--teal);
+        cursor:pointer; white-space:nowrap;
+    }
+
+    /* ===== VALUE PROP ===== */
+    .value-grid{
+        display:grid; grid-template-columns:repeat(2,1fr); gap:16px;
+    }
+    .value-card{
+        border:1px solid var(--border); border-radius:16px;
+        padding:24px; background:var(--white);
+        transition:all 0.2s;
+    }
+    .value-card:hover{ box-shadow:var(--shadow-lg); transform:translateY(-2px); }
+    .value-card .vc-icon{
+        width:46px; height:46px; border-radius:13px;
+        display:flex; align-items:center; justify-content:center;
+        font-size:1.3rem; margin-bottom:14px;
+    }
+    .value-card h4{ font-size:0.98rem; font-weight:700; color:var(--navy); margin-bottom:6px; }
+    .value-card p{ font-size:0.84rem; color:var(--text-mid); line-height:1.6; }
+    .value-card .vc-price{
+        margin-top:12px; font-size:0.78rem; font-weight:700;
+        color:var(--teal); padding-top:10px; border-top:1px solid var(--border);
+    }
+
+    /* ===== HIDDEN ===== */
+    .page{ display:none; }
+    .page.active{ display:block; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width:1200px){
+        .stat-row{ grid-template-columns:repeat(2,1fr); }
+        .asset-grid{ grid-template-columns:repeat(2,1fr); }
+    }
+    @media (max-width:1000px){
+        .sidebar{ display:none; }
+        .main{ margin-left:0; padding:24px 20px 60px; }
+        .topnav{ display:none; }
+        .form-grid{ grid-template-columns:1fr; }
+        .report-grid{ grid-template-columns:1fr; }
+        .value-grid{ grid-template-columns:1fr; }
+    }
+    @media (max-width:640px){
+        .stat-row{ grid-template-columns:1fr; }
+        .asset-grid{ grid-template-columns:1fr; }
+        .calc-metrics{ grid-template-columns:1fr; }
+    }
+    html{ scroll-behavior:smooth; }
+</style>
+</head>
+<body>
+
+<!-- ===== TOP BAR ===== -->
+<header class="topbar">
+    <div class="topbar-inner">
+        <a href="#" class="brand">
+            <div class="brand-mark">G</div>
+            <span>GCFT <b>Portal</b></span>
+        </a>
+        <ul class="topnav">
+            <li><a href="#" class="active" onclick="showPage('dashboard',this)">Dashboard</a></li>
+            <li><a href="#" onclick="showPage('registry',this)">Project Registry</a></li>
+            <li><a href="#" onclick="showPage('mrv',this)">MRV Workbench</a></li>
+            <li><a href="#" onclick="showPage('credits',this)">Credit Ledger</a></li>
+            <li><a href="#" onclick="showPage('services',this)">Services</a></li>
+        </ul>
+        <div class="topbar-actions">
+            <span class="env-badge">OECS AI Institute</span>
+            <div class="avatar">BC</div>
+        </div>
+    </div>
+</header>
+
+<div class="app">
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar">
+        <div class="sidebar-section">
+            <h4>Overview</h4>
+            <ul class="sidebar-nav">
+                <li><a href="#" class="active" onclick="showPage('dashboard',this)"><span class="ni">📊</span> Dashboard</a></li>
+                <li><a href="#" onclick="showPage('registry',this)"><span class="ni">📁</span> Project Registry</a></li>
+                <li><a href="#" onclick="showPage('mrv',this)"><span class="ni">🔬</span> MRV Workbench</a></li>
+                <li><a href="#" onclick="showPage('credits',this)"><span class="ni">🏦</span> Credit Ledger</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <h4>Asset Classes</h4>
+            <ul class="sidebar-nav">
+                <li><a href="#" onclick="selectAsset('geothermal',this)"><span class="ni">🌋</span> Geothermal</a></li>
+                <li><a href="#" onclick="selectAsset('solar',this)"><span class="ni">☀️</span> Solar PV</a></li>
+                <li><a href="#" onclick="selectAsset('wind',this)"><span class="ni">💨</span> Wind</a></li>
+                <li><a href="#" onclick="selectAsset('biogas',this)"><span class="ni">🔥</span> Biogas</a></li>
+                <li><a href="#" onclick="selectAsset('bluecarbon',this)"><span class="ni">🌿</span> Blue Carbon</a></li>
+                <li><a href="#" onclick="selectAsset('ev',this)"><span class="ni">🚗</span> Electric Vehicles</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <h4>Services</h4>
+            <ul class="sidebar-nav">
+                <li><a href="#" onclick="showPage('services',this)"><span class="ni">🛠️</span> Service Catalogue</a></li>
+                <li><a href="#" onclick="showPage('services',this)"><span class="ni">📋</span> Pricing</a></li>
+                <li><a href="#" onclick="showPage('services',this)"><span class="ni">📞</span> Request Assessment</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <h4>Standards</h4>
+            <ul class="sidebar-nav">
+                <li><a href="#"><span class="ni">✅</span> Gold Standard</a></li>
+                <li><a href="#"><span class="ni">✅</span> Verra VCS</a></li>
+                <li><a href="#"><span class="ni">✅</span> Article 6.4</a></li>
+                <li><a href="#"><span class="ni">✅</span> CDM Transition</a></li>
+            </ul>
+        </div>
+    </aside>
+
+    <!-- ===== MAIN ===== -->
+    <main class="main">
+
+        <!-- ==================== DASHBOARD PAGE ==================== -->
+        <div class="page active" id="page-dashboard">
+            <div class="page-head">
+                <div class="crumb">GCFT Portal / Dashboard</div>
+                <h1>MRV-as-a-Service Dashboard</h1>
+                <p>
+                    Sovereign-grade measurement, reporting, and verification infrastructure for
+                    Caribbean climate assets. Built by the OECS AI Institute. Trusted by governments,
+                    utilities, and private asset owners across the Eastern Caribbean.
+                </p>
+            </div>
+
+            <!-- STATS -->
+            <div class="stat-row">
+                <div class="stat-card teal">
+                    <div class="sl">Active Projects</div>
+                    <div class="sv" id="statProjects">7</div>
+                    <div class="sd">Across 5 OECS member states</div>
+                </div>
+                <div class="stat-card gold">
+                    <div class="sl">tCO₂e Under Management</div>
+                    <div class="sv" id="statCo2">1,247,800</div>
+                    <div class="sd">Cumulative verified + pipeline</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="sl">Credits Issued</div>
+                    <div class="sv" id="statCredits">284,600</div>
+                    <div class="sd"><span class="up">↑ 34%</span> vs. prior period</div>
+                </div>
+                <div class="stat-card purple">
+                    <div class="sl">Owner Revenue Facilitated</div>
+                    <div class="sv" id="statRevenue">$4.82M</div>
+                    <div class="sd">85% revenue share to asset owners</div>
+                </div>
+            </div>
+
+            <!-- ALERT -->
+            <div class="alert info">
+                <span class="ai">ℹ️</span>
+                <div>
+                    <b>GCFT Portal is now offering MRV-as-a-Service.</b>
+                    Governments, utilities, geothermal operators, solar farm owners, and private
+                    sector asset holders can now subscribe to end-to-end MRV services — from
+                    baseline setting through credit issuance — without building internal capacity.
+                    <a href="#" onclick="showPage('services',null)" style="color:var(--teal);font-weight:700;">View service catalogue →</a>
+                </div>
+            </div>
+
+            <!-- ASSET CLASSES -->
+            <div class="sec-head">
+                <div>
+                    <h2>Asset Classes Under Management</h2>
+                    <p>Select an asset class to open its MRV workbench and calculator</p>
+                </div>
+            </div>
+            <div class="asset-grid" id="assetGrid"></div>
+
+            <!-- RECENT ACTIVITY -->
+            <div class="sec-head" style="margin-top:32px;">
+                <div>
+                    <h2>Recent MRV Activity</h2>
+                    <p>Latest monitoring, verification, and issuance events across the portfolio</p>
+                </div>
+                <button class="btn btn-ghost btn-sm">Export Log</button>
+            </div>
+            <div class="card card-pad">
+                <div class="table-wrap">
+                    <table class="data">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Project</th>
+                                <th>Asset Class</th>
+                                <th>Event</th>
+                                <th>Value</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="activityTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== REGISTRY PAGE ==================== -->
+        <div class="page" id="page-registry">
+            <div class="page-head">
+                <div class="crumb">GCFT Portal / Project Registry</div>
+                <h1>Project Registry</h1>
+                <p>
+                    All registered climate assets across the GCFT portfolio. Each project is
+                    independently validated and monitored under Gold Standard, Verra VCS, or
+                    Article 6.4 methodologies.
+                </p>
+            </div>
+
+            <div class="sec-head">
+                <div>
+                    <h2>Registered Assets</h2>
+                    <p>7 projects · 5 countries · 4 asset classes</p>
+                </div>
+                <button class="btn btn-primary btn-sm">+ Register New Project</button>
+            </div>
+
+            <div class="card card-pad">
+                <div class="table-wrap">
+                    <table class="data">
+                        <thead>
+                            <tr>
+                                <th>Project ID</th>
+                                <th>Project Name</th>
+                                <th>Country</th>
+                                <th>Asset Class</th>
+                                <th>Capacity</th>
+                                <th>Annual ERs</th>
+                                <th>Standard</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="strong">GCFT-DM-001</span></td>
+                                <td>Dominica Geothermal (10 MW)</td>
+                                <td>Dominica</td>
+                                <td>🌋 Geothermal</td>
+                                <td>10 MW</td>
+                                <td class="strong">49,470 tCO₂</td>
+                                <td>Gold Standard</td>
+                                <td><span class="status-pill verified">● Verified</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="strong">GCFT-KN-002</span></td>
+                                <td>Nevis Geothermal (30 MW)</td>
+                                <td>St. Kitts & Nevis</td>
+                                <td>🌋 Geothermal</td>
+                                <td>30 MW</td>
+                                <td class="strong">154,947 tCO₂</td>
+                                <td>Gold Standard</td>
+                                <td><span class="status-pill pending">● Validation</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="strong">GCFT-SL-003</span></td>
+                                <td>LUCELEC Solar Farm (3 MW)</td>
+                                <td>Saint Lucia</td>
+                                <td>☀️ Solar PV</td>
+                                <td>3 MW</td>
+                                <td class="strong">3,800 tCO₂</td>
+                                <td>Gold Standard</td>
+                                <td><span class="status-pill verified">● Verified</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="strong">GCFT-GD-004</span></td>
+                                <td>GRENLEC Airport Solar (15.1 MW)</td>
+                                <td>Grenada</td>
+                                <td>☀️ Solar PV</td>
+                                <td>15.1 MW</td>
+                                <td class="strong">18,386 tCO₂</td>
+                                <td>Gold Standard</td>
+                                <td><span class="status-pill pending">● Registration</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="strong">GCFT-HT-005</span></td>
+                                <td>COSMOS Biogas Programme</td>
+                                <td>Haiti</td>
+                                <td>🔥 Biogas</td>
+                                <td>1,000 units</td>
+                                <td class="strong">1,200 tCO₂</td>
+                                <td>Gold Standard AWMS</td>
+                                <td><span class="status-pill draft">● Draft PDD</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="strong">GCFT-BB-006</span></td>
+                                <td>Barbados Blue Carbon</td>
+                                <td>Barbados</td>
+                                <td>🌿 Blue Carbon</td>
+                                <td>1,200 ha</td>
+                                <td class="strong">14,400 tCO₂</td>
+                                <td>Verra VCS</td>
+                                <td><span class="status-pill pending">● Feasibility</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="strong">GCFT-TT-007</span></td>
+                                <td>Trinidad EV Fleet</td>
+                                <td>Trinidad & Tobago</td>
+                                <td>🚗 Electric Vehicles</td>
+                                <td>180 vehicles</td>
+                                <td class="strong">9,500 tCO₂</td>
+                                <td>VCS + CCB</td>
+                                <td><span class="status-pill flagged">● Data Gap</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== MRV WORKBENCH PAGE ==================== -->
+        <div class="page" id="page-mrv">
+            <div class="page-head">
+                <div class="crumb">GCFT Portal / MRV Workbench</div>
+                <h1>MRV Workbench</h1>
+                <p>
+                    Configure, calculate, and model carbon credit potential for any asset class.
+                    All calculations use Caribbean-specific emission factors, generation profiles,
+                    and current market pricing.
+                </p>
+            </div>
+
+            <!-- WORKFLOW -->
+            <div class="workflow-steps" id="workflowSteps">
+                <div class="wf-step done"><span class="num">1</span> Project Registration</div>
+                <div class="wf-connector done"></div>
+                <div class="wf-step done"><span class="num">2</span> Baseline Setting</div>
+                <div class="wf-connector done"></div>
+                <div class="wf-step active"><span class="num">3</span> Monitoring</div>
+                <div class="wf-connector"></div>
+                <div class="wf-step"><span class="num">4</span> Verification</div>
+                <div class="wf-connector"></div>
+                <div class="wf-step"><span class="num">5</span> Credit Issuance</div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1.15fr 0.85fr; gap:24px; align-items:start;">
+                <div>
+                    <div class="card card-pad" style="margin-bottom:20px;">
+                        <div class="sec-head">
+                            <div>
+                                <h2 id="mrvAssetTitle">🌋 Geothermal — MRV Configuration</h2>
+                                <p id="mrvAssetDesc">Configure the parameters below to model emission reductions and revenue.</p>
+                            </div>
+                        </div>
+                        <div class="form-grid" id="mrvForm"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="calc-output">
+                        <div class="co-label">Estimated Annual Owner Value</div>
+                        <div class="co-main" id="outRevenue">$0</div>
+                        <div class="co-sub" id="outCo2">0 tCO₂e impact per year</div>
+
+                        <div class="calc-metrics" id="outMetrics"></div>
+
+                        <div class="calc-breakdown" id="outBreakdown"></div>
+                    </div>
+
+                    <div class="alert warn" style="margin-top:16px;">
+                        <span class="ai">⚠️</span>
+                        <div id="outNote">
+                            Estimates based on Caribbean-specific emission factors and current
+                            market pricing. Final credit volumes subject to third-party verification.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DOCUMENTS -->
+            <div class="sec-head" style="margin-top:32px;">
+                <div>
+                    <h2>MRV Documentation Pack</h2>
+                    <p>Audit-ready documents generated for the active project</p>
+                </div>
+                <button class="btn btn-green btn-sm">Generate Full Pack</button>
+            </div>
+            <ul class="doc-list">
+                <li class="doc-item">
+                    <div class="di-icon">📄</div>
+                    <div class="di-body">
+                        <div class="di-title">Project Design Document (PDD)</div>
+                        <div class="di-meta">Gold Standard Renewable Energy Requirements · v2.1 · 48 pages</div>
+                    </div>
+                    <div class="di-action">View →</div>
+                </li>
+                <li class="doc-item">
+                    <div class="di-icon">📊</div>
+                    <div class="di-body">
+                        <div class="di-title">Monitoring Report — Q3 2026</div>
+                        <div class="di-meta">Metered generation data · 2,847 data points · QA/QC passed</div>
+                    </div>
+                    <div class="di-action">View →</div>
+                </li>
+                <li class="doc-item">
+                    <div class="di-icon">🧮</div>
+                    <div class="di-body">
+                        <div class="di-title">Emission Reduction Calculation Workbook</div>
+                        <div class="di-meta">Combined margin emission factor · 0.6277 tCO₂/MWh · Auditable</div>
+                    </div>
+                    <div class="di-action">View →</div>
+                </li>
+                <li class="doc-item">
+                    <div class="di-icon">✅</div>
+                    <div class="di-body">
+                        <div class="di-title">Verification Statement — 2025 Vintage</div>
+                        <div class="di-meta">Signed by accredited VVB · 49,470 tCO₂ verified</div>
+                    </div>
+                    <div class="di-action">View →</div>
+                </li>
+                <li class="doc-item">
+                    <div class="di-icon">🌍</div>
+                    <div class="di-body">
+                        <div class="di-title">SDG Impact Report</div>
+                        <div class="di-meta">SDG 7 · SDG 8 · SDG 13 · Community consultation records</div>
+                    </div>
+                    <div class="di-action">View →</div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- ==================== CREDITS PAGE ==================== -->
+        <div class="page" id="page-credits">
+            <div class="page-head">
+                <div class="crumb">GCFT Portal / Credit Ledger</div>
+                <h1>Credit Ledger</h1>
+                <p>
+                    Full traceability from emission reduction to credit retirement. Every credit
+                    is tracked, serialized, and linked to its underlying MRV evidence.
+                </p>
+            </div>
+
+            <div class="stat-row">
+                <div class="stat-card teal">
+                    <div class="sl">Total Credits Issued</div>
+                    <div class="sv">284,600</div>
+                    <div class="sd">Across 7 registered projects</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="sl">Credits Sold</div>
+                    <div class="sv">198,400</div>
+                    <div class="sd">70% of issued volume</div>
+                </div>
+                <div class="stat-card gold">
+                    <div class="sl">Avg. Sale Price</div>
+                    <div class="sv">$21.40</div>
+                    <div class="sd">Per tCO₂e · Gold Standard premium</div>
+                </div>
+                <div class="stat-card purple">
+                    <div class="sl">Credits Retired</div>
+                    <div class="sv">142,800</div>
+                    <div class="sd">Permanently removed from circulation</div>
+                </div>
+            </div>
+
+            <div class="card card-pad">
+                <div class="table-wrap">
+                    <table class="data">
+                        <thead>
+                            <tr>
+                                <th>Serial Number</th>
+                                <th>Project</th>
+                                <th>Vintage</th>
+                                <th>Volume (tCO₂e)</th>
+                                <th>Buyer</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="strong">GS-DM-001-2025-0001-49470</span></td>
+                                <td>Dominica Geothermal</td>
+                                <td>2025</td>
+                                <td class="strong">49,470</td>
+                                <td>European Sovereign Buyer</td>
+                                <td><span class="status-pill verified">● Retired</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="strong">GS-SL-003-2024-0001-3800</span></td>
+                                <td>LUCELEC Solar Farm</td>
+                                <td>2024</td>
+                                <td class="strong">3,800</td>
+                                <td>Caribbean Hotel Group</td>
+                                <td><span class="status-pill verified">● Retired</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="strong">GS-DM-001-2026-0001-37000</span></td>
+                                <td>Dominica Geothermal</td>
+                                <td>2026</td>
+                                <td class="strong">37,000</td>
+                                <td>Pending Allocation</td>
+                                <td><span class="status-pill pending">● Available</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="strong">GS-HT-005-2025-0001-1200</span></td>
+                                <td>COSMOS Biogas</td>
+                                <td>2025</td>
+                                <td class="strong">1,200</td>
+                                <td>UNDP Carbon Platform</td>
+                                <td><span class="status-pill pending">● Reserved</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="strong">GS-KN-002-2028-0001-154947</span></td>
+                                <td>Nevis Geothermal</td>
+                                <td>2028 (fwd)</td>
+                                <td class="strong">154,947</td>
+                                <td>Forward Purchase Agreement</td>
+                                <td><span class="status-pill draft">● Forward</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== SERVICES PAGE ==================== -->
+        <div class="page" id="page-services">
+            <div class="page-head">
+                <div class="crumb">GCFT Portal / Services</div>
+                <h1>MRV-as-a-Service Catalogue</h1>
+                <p>
+                    GCFT Portal is a full-service MRV provider. We handle everything from
+                    project registration to credit issuance. You focus on your asset — we
+                    handle the measurement, reporting, verification, and market access.
+                </p>
+            </div>
+
+            <div class="value-grid">
+                <div class="value-card">
+                    <div class="vc-icon" style="background:rgba(0,180,216,0.12);">📋</div>
+                    <h4>Project Registration & Feasibility</h4>
+                    <p>
+                        We assess your asset, determine eligibility under Gold Standard or Verra,
+                        select the right methodology, and prepare the Project Design Document (PDD).
+                        Includes baseline setting, additionality demonstration, and stakeholder
+                        consultation.
+                    </p>
+                    <div class="vc-price">From $15,000 · 8–12 weeks</div>
+                </div>
+                <div class="value-card">
+                    <div class="vc-icon" style="background:rgba(45,106,79,0.12);">🔬</div>
+                    <h4>Continuous Monitoring & Data Collection</h4>
+                    <p>
+                        We deploy IoT sensors, satellite analytics, drone surveys, and meter
+                        integrations to collect audit-ready data. Our digital MRV platform
+                        automates data validation, anomaly detection, and reporting.
+                    </p>
+                    <div class="vc-price">From $3,500/month · per project</div>
+                </div>
+                <div class="value-card">
+                    <div class="vc-icon" style="background:rgba(255,183,3,0.12);">✅</div>
+                    <h4>Verification Coordination</h4>
+                    <p>
+                        We manage the entire verification process — selecting the accredited VVB,
+                        preparing the verification package, responding to findings, and securing
+                        the verification statement. You get a signed, audit-ready certificate.
+                    </p>
+                    <div class="vc-price">From $8,000 · per verification cycle</div>
+                </div>
+                <div class="value-card">
+                    <div class="vc-icon" style="background:rgba(124,58,237,0.12);">🏦</div>
+                    <h4>Credit Issuance & Registry Management</h4>
+                    <p>
+                        We handle registry accounts, credit serialization, issuance requests, and
+                        retirement tracking. Your credits are issued under your name — we manage
+                        the infrastructure.
+                    </p>
+                    <div class="vc-price">3% of credit value · on issuance</div>
+                </div>
+                <div class="value-card">
+                    <div class="vc-icon" style="background:rgba(231,111,81,0.12);">📈</div>
+                    <h4>Carbon Market Access & Offtake</h4>
+                    <p>
+                        We connect your credits to corporate buyers, sovereign funds, and
+                        Article 6 bilateral agreements. Our buyer network includes European
+                        utilities, Caribbean hospitality groups, and multilateral institutions.
+                    </p>
+                    <div class="vc-price">5% of transaction value · on sale</div>
+                </div>
+                <div class="value-card">
+                    <div class="vc-icon" style="background:rgba(0,180,216,0.12);">🌍</div>
+                    <h4>Article 6.4 Authorization Support</h4>
+                    <p>
+                        We navigate the Paris Agreement Crediting Mechanism for you — from
+                        host-country approval to Letter of Authorization (LOA) and corresponding
+                        adjustment tracking. This unlocks premium sovereign pricing.
+                    </p>
+                    <div class="vc-price">From $25,000 · 12–18 months</div>
+                </div>
+            </div>
+
+            <div class="alert info" style="margin-top:24px;">
+                <span class="ai">💡</span>
+                <div>
+                    <b>Bundled offering available.</b> Asset owners who subscribe to the full
+                    MRV-as-a-Service package (registration + monitoring + verification + issuance)
+                    receive a <b>20% discount</b> on total fees and priority access to our buyer
+                    network. Revenue share models are also available for projects that prefer
+                    no upfront cost.
+                </div>
+            </div>
+
+            <div class="sec-head" style="margin-top:32px;">
+                <div>
+                    <h2>Who We Serve</h2>
+                    <p>GCFT Portal works with any organisation that owns or operates a climate asset</p>
+                </div>
+            </div>
+            <div class="report-grid">
+                <div class="report-block">
+                    <h4>🏛️ Governments & Public Agencies</h4>
+                    <div class="rb-note">National governments, utilities, and public infrastructure owners seeking to monetise sovereign climate assets.</div>
+                    <div class="rb-stats">
+                        <div class="rb-stat"><span class="k">Geothermal plants</span><span class="v">Dominica, Nevis</span></div>
+                        <div class="rb-stat"><span class="k">Utility solar farms</span><span class="v">LUCELEC, GRENLEC</span></div>
+                        <div class="rb-stat"><span class="k">Public fleets</span><span class="v">EV transitions</span></div>
+                        <div class="rb-stat"><span class="k">Waste-to-energy</span><span class="v">Landfill gas</span></div>
+                    </div>
+                </div>
+                <div class="report-block">
+                    <h4>🏢 Private Sector Asset Owners</h4>
+                    <div class="rb-note">Independent power producers, hotel groups, manufacturers, and fleet operators with verifiable emission reductions.</div>
+                    <div class="rb-stats">
+                        <div class="rb-stat"><span class="k">Rooftop solar</span><span class="v">Hotels, warehouses</span></div>
+                        <div class="rb-stat"><span class="k">Industrial efficiency</span><span class="v">Retrofits, VFDs</span></div>
+                        <div class="rb-stat"><span class="k">Commercial EV fleets</span><span class="v">Taxis, delivery</span></div>
+                        <div class="rb-stat"><span class="k">Refrigeration</span><span class="v">Cold chain, HVAC</span></div>
+                    </div>
+                </div>
+                <div class="report-block">
+                    <h4>🌿 Nature-Based Project Developers</h4>
+                    <div class="rb-note">Mangrove restoration, agroforestry, and seagrass conservation projects across the Caribbean.</div>
+                    <div class="rb-stats">
+                        <div class="rb-stat"><span class="k">Blue carbon</span><span class="v">Mangrove, seagrass</span></div>
+                        <div class="rb-stat"><span class="k">Agroforestry</span><span class="v">Shade cacao, silvopasture</span></div>
+                        <div class="rb-stat"><span class="k">Watershed restoration</span><span class="v">Riparian buffers</span></div>
+                        <div class="rb-stat"><span class="k">Community forests</span><span class="v">REDD+</span></div>
+                    </div>
+                </div>
+                <div class="report-block">
+                    <h4>🌊 Blue Economy Operators</h4>
+                    <div class="rb-note">Fisheries, aquaculture, marine tourism, and port operators with measurable emissions reductions.</div>
+                    <div class="rb-stats">
+                        <div class="rb-stat"><span class="k">Fishing fleet electrification</span><span class="v">Hybrid, electric</span></div>
+                        <div class="rb-stat"><span class="k">Port cold chain</span><span class="v">Refrigerant retrofit</span></div>
+                        <div class="rb-stat"><span class="k">Marine transport</span><span class="v">Ferry electrification</span></div>
+                        <div class="rb-stat"><span class="k">Aquaculture</span><span class="v">Pump efficiency</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script>
+/* ============================================================
+   COUNTRY DATA
+   ============================================================ */
+const COUNTRIES = {
+    belize:   { name:'Belize',              ef:0.38, psh:4.9, powerPrice:0.24 },
+    jamaica:  { name:'Jamaica',             ef:0.62, psh:5.0, powerPrice:0.28 },
+    trinidad: { name:'Trinidad & Tobago',   ef:0.55, psh:4.8, powerPrice:0.09 },
+    barbados: { name:'Barbados',            ef:0.58, psh:5.2, powerPrice:0.30 },
+    bahamas:  { name:'The Bahamas',         ef:0.68, psh:5.0, powerPrice:0.32 },
+    guyana:   { name:'Guyana',              ef:0.42, psh:4.6, powerPrice:0.18 },
+    suriname: { name:'Suriname',            ef:0.35, psh:4.5, powerPrice:0.15 },
+    dominica: { name:'Dominica',            ef:0.55, psh:4.7, powerPrice:0.33 },
+    grenada:  { name:'Grenada',             ef:0.63, psh:4.8, powerPrice:0.34 },
+    stlucia:  { name:'Saint Lucia',         ef:0.65, psh:4.9, powerPrice:0.33 },
+    stkitts:  { name:'St. Kitts & Nevis',   ef:0.67, psh:5.0, powerPrice:0.34 },
+    antigua:  { name:'Antigua & Barbuda',   ef:0.65, psh:5.1, powerPrice:0.36 },
+    dr:       { name:'Dominican Republic',  ef:0.50, psh:5.1, powerPrice:0.20 }
+};
+
+const REVENUE_SHARE = 0.85;
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+const fmt = (n,d=0) => Number(n).toLocaleString('en-US',{maximumFractionDigits:d,minimumFractionDigits:d});
+const money = n => '$' + Math.round(n).toLocaleString('en-US');
+const pct = (part,total) => total>0 ? Math.max(0,Math.min(100,(part/total)*100)) : 0;
+
+/* ============================================================
+   ASSET DEFINITIONS
+   ============================================================ */
+const ASSETS = {
+    geothermal: {
+        icon:'🌋', label:'Geothermal', tagline:'Baseload · Binary · Flash',
+        price: 12.00,
+        desc:'24/7 baseload power from volcanic islands. Replaces diesel and heavy fuel oil generation, delivering both power sales revenue and carbon credits.',
+        fields:[
+            { id:'geoCap', label:'Capacity (MW)', type:'number', value:10, min:0.1, step:0.1 },
+            { id:'geoCF', label:'Capacity Factor (%)', type:'number', value:90, min:50, max:98 },
+            { id:'geoCountry', label:'Country', type:'country' }
+        ],
+        calc(v){
+            const mw = +v.geoCap || 0;
+            const cf = (+v.geoCF || 0) / 100;
+            const c = COUNTRIES[v.geoCountry] || COUNTRIES.dominica;
+            const genMWh = mw * 8760 * cf;
+            const co2 = genMWh * c.ef;
+            const creditRev = co2 * this.price * REVENUE_SHARE;
+            const energyRev = genMWh * 1000 * c.powerPrice;
+            const total = creditRev + energyRev;
+            return {
+                co2,
+                metrics:[
+                    ['Annual Generation', fmt(genMWh)+' MWh'],
+                    ['Emission Factor', c.ef+' tCO₂/MWh'],
+                    ['Carbon Credits', fmt(co2)+' /yr'],
+                    ['Total Annual Value', money(total)+' /yr']
+                ],
+                revenue: total,
+                revenueLabel:'Total Annual Value to Owner',
+                breakdown:[
+                    { label:'Power purchase revenue', pct: pct(energyRev,total), color:'#ffb703' },
+                    { label:'Carbon credit revenue (85% share)', pct: pct(creditRev,total), color:'#48cae4' }
+                ],
+                note:'Geothermal provides 24/7 baseload power at 90%+ capacity factors. Carbon credits from displaced diesel generation command premium pricing under Gold Standard and Article 6.4.'
+            };
+        }
+    },
+
+    solar: {
+        icon:'☀️', label:'Solar PV', tagline:'Rooftop · Utility · Community',
+        price: 14.00,
+        desc:'The Caribbean receives 4.5–5.5 peak sun hours daily. Solar generates both direct electricity savings and carbon credits from displacing diesel generation.',
+        fields:[
+            { id:'solSize', label:'System Size (kW DC)', type:'number', value:100, min:1 },
+            { id:'solType', label:'Installation Type', type:'select', options:[
+                { v:'rooftop',   t:'Rooftop Commercial / Residential', pr:0.80 },
+                { v:'ground',    t:'Ground-Mount Utility Scale', pr:0.82 },
+                { v:'community', t:'Community Solar Garden', pr:0.78 }
+            ]},
+            { id:'solCountry', label:'Country', type:'country' }
+        ],
+        calc(v){
+            const typeOpt = this.fields[1].options.find(o=>o.v===v.solType) || this.fields[1].options[0];
+            const kw = +v.solSize || 0;
+            const c = COUNTRIES[v.solCountry] || COUNTRIES.stlucia;
+            const genMWh = kw * c.psh * 365 * typeOpt.pr / 1000;
+            const co2 = genMWh * c.ef;
+            const creditRev = co2 * this.price * REVENUE_SHARE;
+            const energyRev = genMWh * 1000 * c.powerPrice;
+            const total = creditRev + energyRev;
+            return {
+                co2,
+                metrics:[
+                    ['Annual Generation', fmt(genMWh)+' MWh'],
+                    ['Emission Factor', c.ef+' tCO₂/MWh'],
+                    ['Carbon Credits', fmt(co2)+' /yr'],
+                    ['Total Annual Value', money(total)+' /yr']
+                ],
+                revenue: total,
+                revenueLabel:'Total Annual Value to Owner',
+                breakdown:[
+                    { label:'Electricity savings', pct: pct(energyRev,total), color:'#ffb703' },
+                    { label:'Carbon credit revenue (85% share)', pct: pct(creditRev,total), color:'#48cae4' }
+                ],
+                note:'Solar delivers both energy savings and carbon credits. Grid emission factors vary — Saint Lucia (0.65) and St. Kitts (0.67) have the highest, meaning more credits per MWh.'
+            };
+        }
+    },
+
+    wind: {
+        icon:'💨', label:'Wind Energy', tagline:'Onshore · Offshore · Hybrid',
+        price: 14.00,
+        desc:'The Eastern Caribbean sits in a strong trade wind corridor with capacity factors of 35–45%. Wind displaces expensive imported diesel and heavy fuel oil.',
+        fields:[
+            { id:'windCap', label:'Capacity (MW)', type:'number', value:10, min:0.1, step:0.1 },
+            { id:'windCF', label:'Capacity Factor (%)', type:'number', value:40, min:15, max:60 },
+            { id:'windCountry', label:'Country', type:'country' }
+        ],
+        calc(v){
+            const mw = +v.windCap || 0;
+            const cf = (+v.windCF || 0) / 100;
+            const c = COUNTRIES[v.windCountry] || COUNTRIES.jamaica;
+            const genMWh = mw * 8760 * cf;
+            const co2 = genMWh * c.ef;
+            const creditRev = co2 * this.price * REVENUE_SHARE;
+            const energyRev = genMWh * 1000 * c.powerPrice;
+            const total = creditRev + energyRev;
+            return {
+                co2,
+                metrics:[
+                    ['Annual Generation', fmt(genMWh)+' MWh'],
+                    ['Capacity Factor', (cf*100).toFixed(0)+'%'],
+                    ['Carbon Credits', fmt(co2)+' /yr'],
+                    ['Total Annual Value', money(total)+' /yr']
+                ],
+                revenue: total,
+                revenueLabel:'Total Annual Value to Owner',
+                breakdown:[
+                    { label:'Power purchase revenue', pct: pct(energyRev,total), color:'#ffb703' },
+                    { label:'Carbon credit revenue (85% share)', pct: pct(creditRev,total), color:'#48cae4' }
+                ],
+                note:'Wind projects typically operate under 20-year PPAs. Carbon credits are additional revenue on top of PPA pricing, improving project IRR by 1–3 percentage points.'
+            };
+        }
+    },
+
+    biogas: {
+        icon:'🔥', label:'Biogas', tagline:'Anaerobic Digestion · Landfill Gas',
+        price: 16.00,
+        desc:'Caribbean organic waste — manure, food waste, sargassum seaweed — is a major methane source. Anaerobic digestion captures this methane for clean energy and fertilizer.',
+        fields:[
+            { id:'bioFeed', label:'Feedstock Type', type:'select', options:[
+                { v:'manure',    t:'Animal Manure', co2:1.2, yield:40 },
+                { v:'food',      t:'Food & Organic Waste', co2:0.6, yield:100 },
+                { v:'agri',      t:'Agricultural Residues', co2:0.5, yield:80 },
+                { v:'landfill',  t:'Landfill Gas Capture', co2:0.9, yield:60 },
+                { v:'sludge',    t:'Sewage Sludge', co2:0.7, yield:60 },
+                { v:'sargassum', t:'Sargassum Seaweed', co2:0.8, yield:90 }
+            ]},
+            { id:'bioTonnes', label:'Feedstock (tonnes/year)', type:'number', value:5000, min:1 },
+            { id:'bioCountry', label:'Country', type:'country' }
+        ],
+        calc(v){
+            const typeOpt = this.fields[0].options.find(o=>o.v===v.bioFeed) || this.fields[0].options[0];
+            const t = +v.bioTonnes || 0;
+            const c = COUNTRIES[v.bioCountry] || COUNTRIES.barbados;
+            const co2 = t * typeOpt.co2;
+            const biogasM3 = t * typeOpt.yield;
+            const elecMWh = biogasM3 * 2 / 1000;
+            const creditRev = co2 * this.price * REVENUE_SHARE;
+            const energyRev = elecMWh * 1000 * c.powerPrice;
+            const digestateRev = t * 15;
+            const total = creditRev + energyRev + digestateRev;
+            return {
+                co2,
+                metrics:[
+                    ['Biogas Produced', fmt(biogasM3)+' m³/yr'],
+                    ['Electricity Generated', fmt(elecMWh)+' MWh'],
+                    ['Carbon Credits', fmt(co2)+' /yr'],
+                    ['Total Annual Value', money(total)+' /yr']
+                ],
+                revenue: total,
+                revenueLabel:'Total Annual Value to Owner',
+                breakdown:[
+                    { label:'Carbon credit revenue', pct: pct(creditRev,total), color:'#52b788' },
+                    { label:'Electricity sales', pct: pct(energyRev,total), color:'#ffb703' },
+                    { label:'Organic fertilizer', pct: pct(digestateRev,total), color:'#48cae4' }
+                ],
+                note:'Methane capture generates premium credits (GWP of methane = 28× CO₂ over 100 years). Sargassum — a growing Caribbean problem — is an excellent feedstock.'
+            };
+        }
+    },
+
+    bluecarbon: {
+        icon:'🌿', label:'Blue Carbon', tagline:'Mangrove · Seagrass · Coastal Forest',
+        price: 24.00,
+        desc:'Protect and restore Caribbean coastal ecosystems — the highest-density carbon sinks on Earth. Mangroves and seagrasses sequester carbon up to 10× faster than tropical forests.',
+        fields:[
+            { id:'bcType', label:'Ecosystem Type', type:'select', options:[
+                { v:'mangrove', t:'Mangrove Forest', rate:12.5 },
+                { v:'seagrass', t:'Seagrass Meadow', rate:8.2 },
+                { v:'coastal',  t:'Coastal Forest / Watershed', rate:6.8 },
+                { v:'mixed',    t:'Mixed Coastal Ecosystem', rate:9.5 }
+            ]},
+            { id:'bcHa', label:'Hectares Under Management', type:'number', value:50, min:1 },
+            { id:'bcCountry', label:'Country', type:'country' }
+        ],
+        calc(v){
+            const typeOpt = this.fields[0].options.find(o=>o.v===v.bcType) || this.fields[0].options[0];
+            const ha = +v.bcHa || 0;
+            const co2 = ha * typeOpt.rate;
+            const creditRev = co2 * this.price * REVENUE_SHARE;
+            return {
+                co2,
+                metrics:[
+                    ['Ecosystem Area', fmt(ha)+' ha'],
+                    ['Sequestration Rate', typeOpt.rate+' tCO₂/ha/yr'],
+                    ['Carbon Credits', fmt(co2)+' /yr'],
+                    ['Credit Price', '$'+this.price.toFixed(2)+'/tCO₂']
+                ],
+                revenue: creditRev,
+                revenueLabel:'Annual Owner Revenue',
+                breakdown:[
+                    { label:'Carbon credit sales (85% share)', pct:100, color:'#52b788' }
+                ],
+                note:'Blue carbon credits command premium pricing ($20–30/tCO₂) due to co-benefits: biodiversity, coastal protection, and community livelihoods.'
+            };
+        }
+    },
+
+    ev: {
+        icon:'🚗', label:'Electric Vehicles', tagline:'Fleet · Bus · Taxi · Motorcycle',
+        price: 15.00,
+        desc:'Caribbean islands are ideal for EV adoption: short driving distances, high fuel costs ($1.10–1.40/L), and grid connections everywhere.',
+        fields:[
+            { id:'evType', label:'Vehicle Type', type:'select', options:[
+                { v:'moto',  t:'Motorcycle / Scooter', fuel:2.5,  eff:0.05, ftype:'gasoline' },
+                { v:'car',   t:'Car / Taxi / SUV',     fuel:8.0,  eff:0.18, ftype:'gasoline' },
+                { v:'van',   t:'Van / Minibus',        fuel:12.0, eff:0.25, ftype:'diesel' },
+                { v:'bus',   t:'Bus',                  fuel:35.0, eff:0.90, ftype:'diesel' },
+                { v:'truck', t:'Truck / Heavy Duty',   fuel:28.0, eff:0.80, ftype:'diesel' }
+            ]},
+            { id:'evFleet', label:'Fleet Size (vehicles)', type:'number', value:20, min:1 },
+            { id:'evKm', label:'Annual km per Vehicle', type:'number', value:25000, min:1000, step:500 },
+            { id:'evCountry', label:'Country', type:'country' }
+        ],
+        calc(v){
+            const typeOpt = this.fields[0].options.find(o=>o.v===v.evType) || this.fields[0].options[0];
+            const n = +v.evFleet || 0;
+            const km = +v.evKm || 0;
+            const c = COUNTRIES[v.evCountry] || COUNTRIES.trinidad;
+            const fuelL = n * km * typeOpt.fuel / 100;
+            const fuelEF = typeOpt.ftype === 'gasoline' ? 2.31 : 2.68;
+            const fuelCO2 = fuelL * fuelEF / 1000;
+            const elecKWh = n * km * typeOpt.eff;
+            const elecCO2 = elecKWh * c.ef / 1000;
+            const co2 = Math.max(0, fuelCO2 - elecCO2);
+            const fuelPrice = typeOpt.ftype === 'gasoline' ? 1.20 : 1.10;
+            const fuelCost = fuelL * fuelPrice;
+            const elecCost = elecKWh * c.powerPrice;
+            const fuelSavings = Math.max(0, fuelCost - elecCost);
+            const creditRev = co2 * this.price * REVENUE_SHARE;
+            const total = creditRev + fuelSavings;
+            return {
+                co2,
+                metrics:[
+                    ['Annual Fuel Displaced', fmt(fuelL)+' L'],
+                    ['Annual Electricity Used', fmt(elecKWh)+' kWh'],
+                    ['Carbon Credits', fmt(co2)+' /yr'],
+                    ['Total Annual Value', money(total)+' /yr']
+                ],
+                revenue: total,
+                revenueLabel:'Total Annual Value to Owner',
+                breakdown:[
+                    { label:'Fuel cost savings', pct: pct(fuelSavings,total), color:'#ffb703' },
+                    { label:'Carbon credit revenue (85% share)', pct: pct(creditRev,total), color:'#48cae4' }
+                ],
+                note:'EV fuel savings are dramatic in the Caribbean where gasoline costs $1.10–1.40/L. Fleet electrification also reduces maintenance costs by ~40%.'
+            };
+        }
+    }
+};
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let currentAsset = 'geothermal';
+let currentPage = 'dashboard';
+
+/* ============================================================
+   PAGE NAVIGATION
+   ============================================================ */
+function showPage(page, linkEl){
+    currentPage = page;
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+
+    document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+    if (linkEl && linkEl.parentElement && linkEl.parentElement.parentElement.classList.contains('sidebar-nav')) {
+        linkEl.classList.add('active');
+    }
+
+    document.querySelectorAll('.topnav a').forEach(a => a.classList.remove('active'));
+    if (linkEl && linkEl.parentElement && linkEl.parentElement.parentElement.classList.contains('topnav')) {
+        linkEl.classList.add('active');
+    }
+
+    window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* ============================================================
+   ASSET SELECTION
+   ============================================================ */
+function selectAsset(key, linkEl){
+    currentAsset = key;
+    showPage('mrv', null);
+    renderAssetCards();
+    renderMrvForm();
+    recalc();
+
+    document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+    if (linkEl) linkEl.classList.add('active');
+}
+
+/* ============================================================
+   RENDER: Asset Cards
+   ============================================================ */
+function renderAssetCards(){
+    const grid = document.getElementById('assetGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    Object.keys(ASSETS).forEach(key => {
+        const a = ASSETS[key];
+        const card = document.createElement('div');
+        card.className = 'asset-card' + (key === currentAsset ? ' selected' : '');
+        card.innerHTML = `
+            <div class="ac-icon" style="background:rgba(0,180,216,0.1);">${a.icon}</div>
+            <h4>${a.label}</h4>
+            <div class="ac-tag">${a.tagline}</div>
+            <div class="ac-meta">
+                <div><span class="k">Standard:</span> <span class="v">Gold Standard</span></div>
+                <div><span class="k">Open →</span></div>
+            </div>
+        `;
+        card.addEventListener('click', () => selectAsset(key, null));
+        grid.appendChild(card);
+    });
+}
+
+/* ============================================================
+   RENDER: MRV Form
+   ============================================================ */
+function renderMrvForm(){
+    const asset = ASSETS[currentAsset];
+    const grid = document.getElementById('mrvForm');
+    const title = document.getElementById('mrvAssetTitle');
+    const desc = document.getElementById('mrvAssetDesc');
+    if (!grid) return;
+
+    title.textContent = asset.icon + ' ' + asset.label + ' — MRV Configuration';
+    desc.textContent = asset.desc;
+
+    grid.innerHTML = '';
+    asset.fields.forEach(field => {
+        const wrap = document.createElement('div');
+        wrap.className = 'field';
+        if (field.type === 'country') wrap.classList.add('full');
+
+        const label = document.createElement('label');
+        label.textContent = field.label;
+        label.htmlFor = 'f_' + field.id;
+        wrap.appendChild(label);
+
+        let input;
+        if (field.type === 'select') {
+            input = document.createElement('select');
+            field.options.forEach(o => {
+                const optEl = document.createElement('option');
+                optEl.value = o.v;
+                optEl.textContent = o.t;
+                input.appendChild(optEl);
+            });
+        } else if (field.type === 'country') {
+            input = document.createElement('select');
+            Object.entries(COUNTRIES).forEach(([k, v]) => {
+                const optEl = document.createElement('option');
+                optEl.value = k;
+                optEl.textContent = v.name;
+                input.appendChild(optEl);
+            });
+        } else {
+            input = document.createElement('input');
+            input.type = 'number';
+            input.value = field.value;
+            if (field.min !== undefined) input.min = field.min;
+            if (field.max !== undefined) input.max = field.max;
+            if (field.step !== undefined) input.step = field.step;
+        }
+        input.id = 'f_' + field.id;
+        input.addEventListener('input', recalc);
+        input.addEventListener('change', recalc);
+        wrap.appendChild(input);
+        grid.appendChild(wrap);
+    });
+}
+
+/* ============================================================
+   RECALCULATE
+   ============================================================ */
+function recalc(){
+    const asset = ASSETS[currentAsset];
+    const values = {};
+    asset.fields.forEach(f => {
+        const el = document.getElementById('f_' + f.id);
+        if (el) values[f.id] = el.value;
+    });
+
+    let result;
+    try {
+        result = asset.calc(values);
+    } catch(err){
+        console.error('Calc error:', err);
+        return;
+    }
+
+    const totalRevenue = result.revenue || 0;
+    const co2 = result.co2 || 0;
+
+    document.getElementById('outRevenue').textContent = money(totalRevenue);
+    document.getElementById('outCo2').textContent = fmt(co2) + ' tCO₂e impact per year';
+
+    document.getElementById('outMetrics').innerHTML = result.metrics
+        .map(([k,v]) => `<div class="calc-metric"><div class="cm-k">${k}</div><div class="cm-v">${v}</div></div>`)
+        .join('');
+
+    document.getElementById('outBreakdown').innerHTML = result.breakdown
+        .map(b => `
+            <div class="cb-row">
+                <div class="cb-top"><span>${b.label}</span><span>${b.pct.toFixed(0)}%</span></div>
+                <div class="cb-bar"><div class="cb-fill" style="width:${b.pct}%;background:${b.color};"></div></div>
+            </div>
+        `)
+        .join('');
+
+    document.getElementById('outNote').textContent = result.note;
+}
+
+/* ============================================================
+   RENDER: Activity Table
+   ============================================================ */
+function renderActivity(){
+    const tbody = document.getElementById('activityTable');
+    if (!tbody) return;
+    const rows = [
+        ['2026-09-10 14:22', 'Dominica Geothermal', '🌋 Geothermal', 'Verification complete', '49,470 tCO₂', 'verified'],
+        ['2026-09-08 09:15', 'LUCELEC Solar Farm', '☀️ Solar PV', 'Monitoring data uploaded', '950 tCO₂ (Q3)', 'pending'],
+        ['2026-09-05 16:40', 'Nevis Geothermal', '🌋 Geothermal', 'PDD submitted for validation', '154,947 tCO₂/yr', 'pending'],
+        ['2026-09-01 11:30', 'COSMOS Biogas', '🔥 Biogas', 'Baseline data collection', '1,200 tCO₂/yr', 'draft'],
+        ['2026-08-28 08:50', 'GRENLEC Airport Solar', '☀️ Solar PV', 'Stakeholder consultation', '18,386 tCO₂/yr', 'pending'],
+        ['2026-08-22 13:10', 'Trinidad EV Fleet', '🚗 Electric Vehicles', 'Data gap flagged', '9,500 tCO₂/yr', 'flagged'],
+        ['2026-08-15 10:05', 'Barbados Blue Carbon', '🌿 Blue Carbon', 'Feasibility assessment', '14,400 tCO₂/yr', 'pending']
+    ];
+    tbody.innerHTML = rows.map(r => `
+        <tr>
+            <td>${r[0]}</td>
+            <td><span class="strong">${r[1]}</span></td>
+            <td>${r[2]}</td>
+            <td>${r[3]}</td>
+            <td class="strong">${r[4]}</td>
+            <td><span class="status-pill ${r[5]}">● ${r[5].charAt(0).toUpperCase()+r[5].slice(1)}</span></td>
+        </tr>
+    `).join('');
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+    renderAssetCards();
+    renderMrvForm();
+    recalc();
+    renderActivity();
+
+    // Sidebar nav active state
+    document.querySelectorAll('.sidebar-nav a').forEach(a => {
+        a.addEventListener('click', function(e){
+            const parent = this.parentElement.parentElement;
+            if (parent.classList.contains('sidebar-nav')) {
+                if (this.getAttribute('onclick') && this.getAttribute('onclick').includes('selectAsset')) return;
+                document.querySelectorAll('.sidebar-nav a').forEach(x => x.classList.remove('active'));
+                this.classList.add('active');
+            }
+        });
+    });
+});
+</script>
+
+</body>
+</html>
